@@ -1,11 +1,8 @@
-const sharp = require('sharp');
-const fs = require('graceful-fs');
-
 const {
 	CACHE_MAX_AGE_SECONDS,
 	MAX_IMAGE_DIMENSIONS
-} = require('../config');
-const {getImageRecord} = require('../lib/libImageRecords');
+} = require('../config/environment');
+const {images} = require('../lib/libImageRecords');
 const {constrainDimensions} = require('../lib/libImageMeta');
 
 const getImageDataFromCaptures = ([category = 'all', widthStr, heightStr]) => {
@@ -69,21 +66,13 @@ exports.getImageOfSize = (ctx) => {
 		largestDimension
 	} = getImageDataFromCaptures(ctx.captures);
 
-	const imageRecord = getImageRecord(category, ratio, largestDimension);
-	if (!imageRecord) return; //TODO: something better here
-
-	const file = fs.createReadStream(imageRecord.filepath);
-	const transformer = sharp()
-		.resize(width, height)
-		.crop(sharp.strategy.entropy)
-		.on('error', function (err) {
-			console.log(err);
-		});
+	const image = images.getImage(category, ratio, largestDimension);
+	if (!image) return; //TODO: something better here
 
 
 	// TODO: Move these to middleware
 	ctx.set('Content-Type', 'image/jpeg');
 	ctx.set('Cache-Control', `max-age=${CACHE_MAX_AGE_SECONDS}`);
 	ctx.set('Access-Control-Allow-Origin', '*');
-	ctx.body = file.pipe(transformer);
+	ctx.body = image.getResizedImage(width, height);
 };

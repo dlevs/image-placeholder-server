@@ -8,24 +8,28 @@ const mkdirp = promisify(require('mkdirp'));
 const sharp = require('sharp');
 const path = require('path');
 
-// Project
-const {getImageMetaData} = require('./libImage');
-const {getMetaFromFilepath, processRecordsForSaving} = require('./libImageRecords');
-const {
-	MAX_IMAGE_DIMENSIONS,
-	IMAGE_SOURCE_PATH,
-	IMAGE_DEST_PATH
-} = require('../config');
-
+const {MAX_IMAGE_DIMENSIONS} = require('../config/environment');
+const {IMAGE_SOURCE_PATH, IMAGE_DEST_PATH} =  require('../config/paths');
 
 const processFiles = async (filepaths) => {
-	const fileData = await Promise.all(filepaths.map(async (filepath) => {
+	const getMetaFromFilepath = (filepath) => {
+		const parsedFilespath = path.parse(filepath);
+		const directories = parsedFilespath.dir.split(path.sep);
+
+		return {
+			name: parsedFilespath.name,
+			subCategory: directories.pop(),
+			category: directories.pop()
+		};
+	};
+
+	return await Promise.all(filepaths.map(async (filepath) => {
 		// get file
 		const file = await fs.readFileAsync(filepath);
 		const image = sharp(file);
 
 		// get meta
-		const {ratio, largestDimension} = await getImageMetaData(image);
+		const {width, height} = await image.metadata();
 		const {category, subCategory, name} = getMetaFromFilepath(filepath);
 
 		// prep output
@@ -49,15 +53,13 @@ const processFiles = async (filepaths) => {
 			filepath: outputFilepath,
 			subCategory,
 			category,
-			ratio,
-			largestDimension
+			width,
+			height
 		};
 	}));
-
-	return processRecordsForSaving(fileData);
 };
 
-const run = async () => {
+exports.init = async () => {
 	const [files] = await Promise.all([
 		// Get files to process
 		glob(IMAGE_SOURCE_PATH.join('*/*/*.jp*g').value, {nocase: true}),
@@ -73,5 +75,3 @@ const run = async () => {
 		JSON.stringify(fileData, null, '\t')
 	);
 };
-
-run();

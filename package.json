@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js --use_strict",
+    "build": "babel src -d dist",
+    "serve": "node dist/index.js",
+    "dev": "node src/index.js",
+    "start": "npm run serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,6 +16,7 @@
     "node": "7.8.0"
   },
   "dependencies": {
+    "babel-cli": "^6.24.1",
     "babel-core": "^6.24.0",
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.4.0",
