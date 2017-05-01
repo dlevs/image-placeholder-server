@@ -38,7 +38,6 @@ module.exports = class ImageManager {
 	constructor(imageRecords, options) {
 		this.images = imageRecords.map((imageData) => new Image(imageData, options));
 		this.organizedImages = organizeImages(this.images);
-		this.maxDimension = options.maxDimension;
 	}
 
 	get length() {
@@ -78,7 +77,7 @@ module.exports = class ImageManager {
 	 * @param {String} categoryId
 	 * @param {Number} ratio
 	 */
-	getImageGroup(categoryId = 'all', ratio = 1) {
+	getImageGroup(ratio = 1, categoryId = 'all') {
 		const imageGroup = (() => {
 			const category = this.getCategory(categoryId);
 			if (!category) return;
@@ -100,9 +99,9 @@ module.exports = class ImageManager {
 	}
 
 	getImage({category, ratio, largestDimension}) {
-		const imageGroup = this.getImageGroup(category, ratio);
+		const imageGroup = this.getImageGroup(ratio, category);
 		// Choose an image from the group based on image size
-		const index = Math.round((largestDimension / this.maxDimension) * (imageGroup.length - 1));
+		const index = Math.round((largestDimension / Math.max(imageGroup)) * (imageGroup.length - 1));
 		return imageGroup[index];
 	}
 };
