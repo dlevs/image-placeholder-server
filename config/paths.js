@@ -1,3 +1,5 @@
+'use strict';
+
 const chainMethods = require('chain-methods');
 const Path = chainMethods(require('path'));
 

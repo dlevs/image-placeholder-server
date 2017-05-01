@@ -1,3 +1,5 @@
+'use strict';
+
 const {
 	CACHE_MAX_AGE_SECONDS,
 	MAX_IMAGE_DIMENSIONS

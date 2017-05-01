@@ -1,3 +1,5 @@
+'use strict';
+
 // const nconf = require('nconf');
 //
 // // Setup nconf to use (in-order):
@@ -25,6 +27,7 @@
 // to the .env file.
 module.exports = {
 	MAX_IMAGE_DIMENSIONS: 2000,
+	MAX_CONCURRENT_IMAGE_PROCESSES: 6,
 	URL_DIMENSION_DELIMITER: 'x',
 	PORT: 2609
 	// // Assert that these values exist on `process.env`

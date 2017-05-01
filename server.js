@@ -1,3 +1,5 @@
+'use strict';
+
 const Koa = require('koa');
 // TODO: Check this doesn't try to compress images
 const compress = require('koa-compress');
