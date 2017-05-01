@@ -22,7 +22,7 @@ const groupImagesByRatio = pipe(
 	sortBy(['ratio'])
 );
 const groupImagesByCategory = reduce((prev, image) => {
-	image.categories.forEach((category) => {
+	image.categoryIds.forEach((category) => {
 		prev[category] = prev[category] || [];
 		prev[category].push(image);
 	});
@@ -35,19 +35,22 @@ const organizeImages = pipe(
 
 
 module.exports = class ImageManager {
-	constructor(imageRecords, options = {}) {
-		this.images = imageRecords.map((record) => new Image(record, options));
-		this.imagesByCategory = organizeImages(this.images);
-		// this.maxDimensions = options.maxDimensions;
-		console.log(JSON.stringify(this.imagesByCategory, null, 4))
+	constructor(imageRecords, options) {
+		this.images = imageRecords.map((imageData) => new Image(imageData, options));
+		this.organizedImages = organizeImages(this.images);
+		this.maxDimension = options.maxDimension;
 	}
 
 	get length() {
 		return this.images.length;
 	}
 
-	get categories() {
-		return Object.keys(this.imagesByCategory).sort();
+	get categoryIds() {
+		return Object.keys(this.organizedImages).sort();
+	}
+
+	getCategory(category) {
+		return this.organizedImages[category];
 	}
 
 	/**
@@ -72,35 +75,34 @@ module.exports = class ImageManager {
 	 * getRecordsWithClosestRatio(records, 0.9);
 	 * // returns the records array from the object with ratio 0.8.
 	 *
-	 * @param {Object[]} records
-	 * @param {Object} value
+	 * @param {String} categoryId
+	 * @param {Number} ratio
 	 */
-	_getImagesGroupOfClosestRatio(category, ratio) {
-		if (!this.imagesByCategory[category]) return;
+	getImageGroup(categoryId = 'all', ratio = 1) {
+		const imageGroup = (() => {
+			const category = this.getCategory(categoryId);
+			if (!category) return;
 
-		const ratioGroups = this.imagesByCategory[category];
-		const imageGroup = ratioGroups.find((image) => image.ratio >= ratio);
+			const imageGroup = category.find((image) => image.ratio >= ratio);
 
-		if (imageGroup) return imageGroup;
+			if (imageGroup) return imageGroup;
 
-		// No record found. Value is either less than the smallest ratio...
-		if (ratio < ratioGroups[0].ratio) return ratioGroups[0].images;
+			// No record found. Value is either less than the smallest ratio...
+			if (ratio < category[0].ratio) return category[0].images;
 
-		// ...or it's bigger than the last.
-		return ratioGroups[ratioGroups.length - 1];
-	};
-
-	getImagesOfClosestRatio(category, ratio) {
-		const imageGroup = this._getImagesGroupOfClosestRatio(category, ratio);
+			// ...or it's bigger than the last.
+			return category[category.length - 1];
+		})();
 
 		if (!imageGroup) return [];
 
 		return imageGroup.images;
 	}
 
-	getImage({category = null, ratio = 1, largestDimension} = {}) {
-		const images = this.getImagesOfClosestRatio(category, ratio);
-		const index = Math.round((largestDimension / this.maxDimensions) * (images.length - 1));
-		return images[index];
+	getImage({category, ratio, largestDimension}) {
+		const imageGroup = this.getImageGroup(category, ratio);
+		// Choose an image from the group based on image size
+		const index = Math.round((largestDimension / this.maxDimension) * (imageGroup.length - 1));
+		return imageGroup[index];
 	}
 };

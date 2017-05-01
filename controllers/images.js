@@ -60,6 +60,10 @@ exports.IMAGE_ROUTE_REGEX = new RegExp(
  * Render an image with specified dimensions.
  */
 exports.getImageOfSize = (ctx) => {
+	// TODO: Move these to middleware
+	ctx.set('Cache-Control', `max-age=${CACHE_MAX_AGE_SECONDS}`);
+	ctx.set('Access-Control-Allow-Origin', '*');
+
 	const {
 		category,
 		width,
@@ -68,13 +72,9 @@ exports.getImageOfSize = (ctx) => {
 		largestDimension
 	} = getImageDataFromCaptures(ctx.captures);
 
-	const image = images.getImage(category, ratio, largestDimension);
+	const image = images.getImage({category, ratio, largestDimension});
 	if (!image) return; //TODO: something better here
 
-
-	// TODO: Move these to middleware
 	ctx.set('Content-Type', 'image/jpeg');
-	ctx.set('Cache-Control', `max-age=${CACHE_MAX_AGE_SECONDS}`);
-	ctx.set('Access-Control-Allow-Origin', '*');
-	ctx.body = image.getResizedImage(width, height);
+	ctx.body = image.createReadStream(width, height);
 };

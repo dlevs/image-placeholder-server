@@ -6,15 +6,13 @@ const fs = require('graceful-fs');
 
 const round = require('lodash/round');
 
-const {MAX_IMAGE_DIMENSIONS} = require('../config/environment');
-const {IMAGE_DEST_PATH} = require('../config/paths');
 
 module.exports = class Image {
-	constructor({filepath, width, height}) {
-		this.filepath = filepath;
-		this.width = width;
-		this.height = height;
-		// this.maxDimensions = MAX_IMAGE_DIMENSIONS;
+	constructor(imageData, options) {
+		this.filepath = imageData.filepath;
+		this.width = imageData.width;
+		this.height = imageData.height;
+		this.imageRootPath = options.imageRootPath;
 	}
 
 	get largestDimension() {
@@ -30,22 +28,22 @@ module.exports = class Image {
 	}
 
 	get relativeFilePath() {
-		return path.relative(IMAGE_DEST_PATH.value, this.filepath);
+		return path.relative(this.imageRootPath, this.filepath);
 	}
 
-	get categories() {
+	get categoryIds() {
 		return path.dirname(this.relativeFilePath).split(path.sep).concat('all');
 	}
 
-	getFileStream() {
-		return fs.createReadStream(this.filepath);
-	}
+	createReadStream(width, height) {
+		const stream = fs.createReadStream(this.filepath);
 
-	getResizedImage(width, height) {
+		if (!width || !height) return stream;
+
 		const transformer = sharp()
 			.resize(width, height)
 			.crop(sharp.strategy.entropy);
 
-		return this.getFileStream().pipe(transformer);
+		return stream.pipe(transformer);
 	}
 };
