@@ -15,11 +15,6 @@
   },
   "dependencies": {
     "async": "^2.4.0",
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.0",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-env": "^1.4.0",
-    "babel-preset-stage-1": "^6.24.1",
     "bluebird": "^3.5.0",
     "chain-methods": "^1.0.0",
     "copyfiles": "^1.2.0",
