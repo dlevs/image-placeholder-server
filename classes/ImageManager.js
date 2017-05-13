@@ -9,10 +9,11 @@ const uniq = require('lodash/uniq');
 const mapValues = require('lodash/fp/mapValues');
 const map = require('lodash/fp/map').convert({cap: false});
 const pipe = require('lodash/fp/pipe');
+const findClosest = require('find-closest');
 
 const Image = require('./Image');
 
-const sortImages = sortBy(['ratio', 'largestDimension', 'filepath']);
+const sortImages = sortBy(['largestDimension', 'filepath']);
 const groupImagesByRatio = pipe(
 	groupBy('coarseRatio'),
 	map((images, ratio) => ({
@@ -60,48 +61,38 @@ module.exports = class ImageManager {
 	 * const records = [
 	 *     {
 	 *         ratio: 0.8,
-	 *         records: []
+	 *         images: []
 	 *     },
 	 *     {
 	 *         ratio: 0.8,
-	 *         records: []
+	 *         images: []
 	 *     },
 	 *     {
 	 *         ratio: 1.2,
-	 *         records: []
+	 *         images: []
 	 *     },
 	 * ]
-	 * getRecordsWithClosestRatio(records, 0.9);
+	 * getImageGroup(0.9);
 	 * // returns the records array from the object with ratio 0.8.
 	 *
 	 * @param {String} categoryId
 	 * @param {Number} ratio
 	 */
 	getImageGroup(ratio = 1, categoryId = 'all') {
-		const imageGroup = (() => {
-			const category = this.getCategory(categoryId);
-			if (!category) return;
+		const category = this.getCategory(categoryId);
+		if (!category) return;
 
-			const imageGroup = category.find((image) => image.ratio >= ratio);
+		const closest = findClosest(category, ratio, 'ratio');
+		if (!closest) return;
 
-			if (imageGroup) return imageGroup;
-
-			// No record found. Value is either less than the smallest ratio...
-			if (ratio < category[0].ratio) return category[0].images;
-
-			// ...or it's bigger than the last.
-			return category[category.length - 1];
-		})();
-
-		if (!imageGroup) return [];
-
-		return imageGroup.images;
+		return closest.images;
 	}
 
 	getImage({category, ratio, largestDimension}) {
-		const imageGroup = this.getImageGroup(ratio, category);
 		// Choose an image from the group based on image size
-		const index = Math.round((largestDimension / Math.max(imageGroup)) * (imageGroup.length - 1));
+		const imageGroup = this.getImageGroup(ratio, category);
+		const largestImage = imageGroup[imageGroup.length - 1];
+		const index = Math.round((largestDimension / largestImage.largestDimension) * (imageGroup.length - 1));
 		return imageGroup[index];
 	}
 };

@@ -7,7 +7,7 @@ const {
 const {images} = require('../lib/libImageRecords');
 const {constrainDimensions} = require('../lib/libImageMeta');
 
-const getImageDataFromCaptures = ([category = 'all', widthStr, heightStr]) => {
+const getImageDataFromCaptures = ([category, widthStr, heightStr]) => {
 	const {width, height} = constrainDimensions(
 		Number(widthStr),
 		Number(heightStr !== undefined ? heightStr : widthStr),
@@ -73,6 +73,7 @@ exports.getImageOfSize = (ctx) => {
 	} = getImageDataFromCaptures(ctx.captures);
 
 	const image = images.getImage({category, ratio, largestDimension});
+
 	if (!image) return; //TODO: something better here
 
 	ctx.set('Content-Type', 'image/jpeg');

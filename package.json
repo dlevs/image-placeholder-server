@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build:images": "node build/processImagesAndSaveRecords.js",
-    "start": "node app.js",
+    "start:server": "node app.js",
+    "start:front-end": "webpack --config frontend/webpack.config.js --watch",
+    "start": "npm run start:server && npm run start:front-end",
     "test": "jest"
   },
   "author": "",
@@ -19,6 +21,7 @@
     "chain-methods": "^1.0.0",
     "copyfiles": "^1.2.0",
     "dotenv": "^4.0.0",
+    "find-closest": "^2.0.1",
     "glob": "^7.1.1",
     "graceful-fs": "^4.1.11",
     "koa": "^2.2.0",
@@ -26,16 +29,28 @@
     "koa-helmet": "^^3.1.0",
     "koa-pug": "^3.0.0-2",
     "koa-router": "^7.1.1",
+    "koa-static": "^3.0.0",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
     "nconf": "^0.8.4",
     "nedb": "^1.8.0",
+    "preact": "^8.1.0",
     "rimraf": "^2.6.1",
     "sharp": "^0.17.3",
     "winston": "^2.3.1"
   },
   "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "css-loader": "^0.28.1",
     "deep-freeze": "^0.0.1",
-    "jest": "^19.0.2"
+    "file-loader": "^0.11.1",
+    "jest": "^19.0.2",
+    "style-loader": "^0.17.0",
+    "url-loader": "^0.5.8",
+    "webpack": "^2.5.1"
   }
 }

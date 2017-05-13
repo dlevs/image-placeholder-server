@@ -5,6 +5,7 @@ const Koa = require('koa');
 const compress = require('koa-compress');
 const helmet = require('koa-helmet');
 const Pug = require('koa-pug');
+const serve = require('koa-static');
 const router = require('./router');
 
 const initViewEngine = (app) =>
@@ -23,6 +24,7 @@ const initServer = ({port}) => {
 	app
 		.use(compress())
 		.use(helmet())
+		.use(serve('./public'))
 		.use(router.routes())
 		.use(router.allowedMethods());
 
